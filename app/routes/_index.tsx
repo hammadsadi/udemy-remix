@@ -1,5 +1,6 @@
 import type { MetaFunction } from "@remix-run/node";
-
+import { json } from "@remix-run/node";
+import { Link, useLoaderData } from "@remix-run/react";
 export const meta: MetaFunction = () => {
   return [
     { title: "New Remix App" },
@@ -7,10 +8,31 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+//  Define Loader Function
+export const loader = async () => {
+  const res = await fetch(
+    "https://jsonplaceholder.typicode.com/posts?_limit=10"
+  );
+  const posts = await res.json();
+  return json({ posts });
+};
+
 export default function Index() {
+  const { posts } = useLoaderData<typeof loader>();
   return (
-    <div>
-      <h2>Hello World</h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-7 ">
+      {posts.map((post: any) => {
+        return (
+          <Link
+            to={`/blogs/${post.id}`}
+            key={post.id}
+            className="bg-white dark:bg-gray-900 p-8 shadow-md rounded-lg space-y-2"
+          >
+            <h2 className="font-bold text-3xl">{post.title}</h2>
+            <p>{post?.body}</p>
+          </Link>
+        );
+      })}
     </div>
   );
 }
